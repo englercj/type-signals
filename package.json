@@ -1,0 +1,30 @@
+{
+  "name": "type-signals",
+  "version": "1.0.0",
+  "main": "./dist/type-signals.js",
+  "types": "./dist/type-signals.d.ts",
+  "description": "Small and fast Signal library for Typescript.",
+  "author": "Chad Engler <chad@pantherdev.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/englercj/type-signals/issues"
+  },
+  "homepage": "https://github.com/englercj/type-signals#readme",
+  "scripts": {
+    "build": "tsc src/type-signals.ts",
+    "pretest": "npm run build",
+    "test": ""
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/englercj/type-signals.git"
+  },
+  "keywords": [
+    "typescript",
+    "signals",
+    "events"
+  ],
+  "devDependencies": {
+    "typescript": "^3.4.3"
+  }
+}
