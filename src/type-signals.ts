@@ -4,20 +4,23 @@ export interface INodeEventEmitter
     removeListener(event: string | symbol, listener: Function): this;
 }
 
-export type SignalFilterFn<Args extends any[]> = (...args: Args) => boolean;
-export type SignalCallbackFn<Args extends any[]> = (...args: Args) => void;
+export type ArgumentTypes<T> = T extends (... args: infer U ) => infer R ? U : never;
+export type ReplaceReturnType<T, TNewReturn> = (...a: ArgumentTypes<T>) => TNewReturn;
 
-export class SignalBinding<Args extends any[]>
+export type SignalFilterFn<T> = ReplaceReturnType<T, boolean>;
+export type SignalCallbackFn<T> = ReplaceReturnType<T, void>;
+
+export class SignalBinding<T>
 {
-    readonly fn: SignalCallbackFn<Args>;
+    readonly fn: SignalCallbackFn<T>;
     readonly once: boolean;
     readonly thisArg: any;
 
-    next: SignalBinding<Args> | null = null;
-    prev: SignalBinding<Args> | null = null;
+    next: SignalBinding<T> | null = null;
+    prev: SignalBinding<T> | null = null;
     owner: Signal<any> | null = null;
 
-    constructor(fn: SignalCallbackFn<Args>, once = false, thisArg: any)
+    constructor(fn: SignalCallbackFn<T>, once = false, thisArg: any)
     {
         this.fn = fn;
         this.once = once;
@@ -40,14 +43,14 @@ export class SignalBinding<Args extends any[]>
     }
 }
 
-export class Signal<Args extends any[] = any[]>
+export class Signal<T>
 {
-    private _head: SignalBinding<Args> | null = null;
-    private _tail: SignalBinding<Args> | null = null;
+    private _head: SignalBinding<T> | null = null;
+    private _tail: SignalBinding<T> | null = null;
 
-    private _filter: SignalFilterFn<Args> | null = null;
+    private _filter: SignalFilterFn<T> | null = null;
 
-    handlers(): SignalBinding<Args>[]
+    handlers(): SignalBinding<T>[]
     {
         let node = this._head;
 
@@ -66,12 +69,12 @@ export class Signal<Args extends any[] = any[]>
         return !!this._head;
     }
 
-    has(node: SignalBinding<Args>): boolean
+    has(node: SignalBinding<T>): boolean
     {
         return node.owner === this;
     }
 
-    dispatch(...args: Args): boolean
+    dispatch(...args: ArgumentTypes<T>): boolean
     {
         let node = this._head;
 
@@ -93,17 +96,17 @@ export class Signal<Args extends any[] = any[]>
         return true;
     }
 
-    add(fn: SignalCallbackFn<Args>, thisArg: any = null): SignalBinding<Args>
+    add(fn: SignalCallbackFn<T>, thisArg: any = null): SignalBinding<T>
     {
         return this._addMiniSignalBinding(new SignalBinding(fn, false, thisArg));
     }
 
-    once(fn: SignalCallbackFn<Args>, thisArg: any = null): SignalBinding<Args>
+    once(fn: SignalCallbackFn<T>, thisArg: any = null): SignalBinding<T>
     {
         return this._addMiniSignalBinding(new SignalBinding(fn, true, thisArg));
     }
 
-    detach(node: SignalBinding<Args>): this
+    detach(node: SignalBinding<T>): this
     {
         if (node.owner !== this)
             return this;
@@ -155,14 +158,14 @@ export class Signal<Args extends any[] = any[]>
         return this;
     }
 
-    filter(filter: SignalFilterFn<Args>)
+    filter(filter: SignalFilterFn<T>)
     {
         this._filter = filter;
     }
 
-    proxy(...signals: Signal<Args>[]): this
+    proxy(...signals: Signal<T>[]): this
     {
-        const fn = (...args: Args) => this.dispatch(...args);
+        const fn = (...args: ArgumentTypes<T>) => this.dispatch(...args);
 
         for (let i = 0; i < signals.length; ++i)
         {
@@ -172,7 +175,7 @@ export class Signal<Args extends any[] = any[]>
         return this;
     }
 
-    private _addMiniSignalBinding (node: SignalBinding<Args>): SignalBinding<Args>
+    private _addMiniSignalBinding (node: SignalBinding<T>): SignalBinding<T>
     {
         if (!this._head)
         {

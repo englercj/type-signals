@@ -11,7 +11,7 @@
   },
   "homepage": "https://github.com/englercj/type-signals#readme",
   "scripts": {
-    "build": "tsc src/type-signals.ts",
+    "build": "tsc -p tsconfig.json",
     "pretest": "npm run build",
     "test": ""
   },
