@@ -1,6 +1,6 @@
 {
   "name": "type-signals",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "main": "./dist/type-signals.js",
   "types": "./dist/type-signals.d.ts",
   "description": "Small and fast Signal library for Typescript.",
