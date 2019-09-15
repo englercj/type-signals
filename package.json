@@ -4,7 +4,7 @@
   "main": "./dist/type-signals.cjs.js",
   "module": "./dist/type-signals.esm.js",
   "bundle": "./dist/type-signals.js",
-  "types": "./typings/index.d.ts",
+  "types": "./dist/index.d.ts",
   "description": "Small and fast Signal library for Typescript.",
   "author": "Chad Engler <chad@pantherdev.com>",
   "license": "MIT",
