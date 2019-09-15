@@ -10,11 +10,6 @@
     "url": "https://github.com/englercj/type-signals/issues"
   },
   "homepage": "https://github.com/englercj/type-signals#readme",
-  "scripts": {
-    "build": "tsc -p tsconfig.json",
-    "pretest": "npm run build",
-    "test": ""
-  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/englercj/type-signals.git"
@@ -24,7 +19,21 @@
     "signals",
     "events"
   ],
+  "files": [
+    "dist",
+    "src",
+    "package.json",
+    "LICENSE",
+    "README.md"
+  ],
+  "scripts": {
+    "prepublishOnly": "npm run build",
+    "build": "tsc -p tsconfig.json",
+    "pretest": "npm run build",
+    "test": ""
+  },
   "devDependencies": {
     "typescript": "^3.4.3"
-  }
+  },
+  "dependencies": {}
 }
