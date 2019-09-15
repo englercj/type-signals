@@ -1,6 +1,6 @@
 {
   "name": "type-signals",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "main": "./dist/type-signals.cjs.js",
   "module": "./dist/type-signals.esm.js",
   "bundle": "./dist/type-signals.js",
