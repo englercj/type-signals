@@ -1,15 +1,17 @@
 {
   "name": "type-signals",
   "version": "1.0.1",
-  "main": "./dist/type-signals.js",
-  "types": "./dist/type-signals.d.ts",
+  "main": "./dist/type-signals.cjs.js",
+  "module": "./dist/type-signals.esm.js",
+  "bundle": "./dist/type-signals.js",
+  "types": "./typings/index.d.ts",
   "description": "Small and fast Signal library for Typescript.",
   "author": "Chad Engler <chad@pantherdev.com>",
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/englercj/type-signals/issues"
   },
-  "homepage": "https://github.com/englercj/type-signals#readme",
+  "homepage": "https://github.com/englercj/type-signals",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/englercj/type-signals.git"
@@ -28,12 +30,15 @@
   ],
   "scripts": {
     "prepublishOnly": "npm run build",
-    "build": "tsc -p tsconfig.json",
-    "pretest": "npm run build",
-    "test": ""
+    "build": "rollup -c",
+    "watch": "rollup -cw"
   },
   "devDependencies": {
-    "typescript": "^3.4.3"
+    "typescript": "^3.6.3",
+    "rimraf": "^3.0.0",
+    "rollup": "^1.21.3",
+    "rollup-plugin-terser": "^5.1.2",
+    "rollup-plugin-typescript2": "^0.24.2"
   },
   "dependencies": {}
 }
