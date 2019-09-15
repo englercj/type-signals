@@ -151,8 +151,8 @@ export class Signal<T extends Function>
 
         while (node)
         {
-          node.owner = null;
-          node = node.next;
+            node.owner = null;
+            node = node.next;
         }
 
         return this;
