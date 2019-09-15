@@ -10,7 +10,7 @@ export type ReplaceReturnType<T, TNewReturn> = (...a: ArgumentTypes<T>) => TNewR
 export type SignalFilterFn<T> = ReplaceReturnType<T, boolean>;
 export type SignalCallbackFn<T> = ReplaceReturnType<T, void>;
 
-export class SignalBinding<T>
+export class SignalBinding<T extends Function>
 {
     readonly fn: SignalCallbackFn<T>;
     readonly once: boolean;
@@ -43,7 +43,7 @@ export class SignalBinding<T>
     }
 }
 
-export class Signal<T>
+export class Signal<T extends Function>
 {
     private _head: SignalBinding<T> | null = null;
     private _tail: SignalBinding<T> | null = null;
@@ -175,7 +175,7 @@ export class Signal<T>
         return this;
     }
 
-    private _addMiniSignalBinding (node: SignalBinding<T>): SignalBinding<T>
+    private _addMiniSignalBinding(node: SignalBinding<T>): SignalBinding<T>
     {
         if (!this._head)
         {
