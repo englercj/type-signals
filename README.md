@@ -2,7 +2,7 @@
 
 Small and fast Signal library for Typescript.
 
-Heavily inspired by [mini-signals](https://github.com/Hypercubed/mini-signals);
+Heavily inspired by [mini-signals](https://github.com/Hypercubed/mini-signals).
 
 ## Install
 
