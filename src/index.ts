@@ -1,12 +1,26 @@
+/** Helper to deduce the argument types of a function. */
 export type ArgumentTypes<T> = T extends (... args: infer U ) => infer R ? U : never;
+
+/** Helper to replace the return type of a function with a different value. */
 export type ReplaceReturnType<T, TNewReturn> = (...a: ArgumentTypes<T>) => TNewReturn;
 
+/** Helper to replace the return type of a function with `boolean`. */
 export type WithBoolReturn<T> = ReplaceReturnType<T, boolean>;
+
+/** Helper to replace the return type of a function with `void`. */
 export type WithVoidReturn<T> = ReplaceReturnType<T, void>;
 
+/**
+ * Interface representing a single binding to the signal.
+ * This can be used to detach the handler function from the owning signal
+ * so that it will no longer receive events.
+ */
 export interface SignalBinding
 {
-    detach(): void;
+    /** Detaches this binding from the owning signal. */
+    detach(): boolean;
+
+    /** Detaches this binding from the owning signal. */
     dispose(): void;
 }
 
@@ -27,7 +41,7 @@ class SignalBindingImpl<T extends Function> implements SignalBinding
         this.thisArg = thisArg;
     }
 
-    detach()
+    detach(): boolean
     {
         if (this.owner === null)
             return false;
@@ -37,12 +51,15 @@ class SignalBindingImpl<T extends Function> implements SignalBinding
         return true;
     }
 
-    dispose()
+    dispose(): void
     {
         this.detach();
     }
 }
 
+/**
+ * A signal is a dispatcher that can bind functions (handlers) to dispatched events.
+ */
 export class Signal<T extends Function>
 {
     private _head: SignalBindingImpl<T> | null = null;
@@ -50,6 +67,9 @@ export class Signal<T extends Function>
 
     private _filter: WithBoolReturn<T> | null = null;
 
+    /**
+     * Gathers a list of all the handlers currently bound to this signal.
+     */
     handlers(): SignalBinding[]
     {
         let node = this._head;
@@ -64,16 +84,31 @@ export class Signal<T extends Function>
         return handlers;
     }
 
+    /**
+     * Returns true if this signal has any bound handlers.
+     */
     hasAny(): boolean
     {
         return !!this._head;
     }
 
+    /**
+     * Returns true if the given binding is owned by this signal.
+     *
+     * @param node The binding to check.
+     */
     has(node: SignalBinding): boolean
     {
         return (node as SignalBindingImpl<T>).owner === this;
     }
 
+    /**
+     * Dispatch an event to all handlers.
+     * If a filter was set, only if it returns `true` will the event get dispatched.
+     *
+     * @param args The arguments to pass to the filter and handlers.
+     * @returns True if the event was dispatched, false otherwise.
+     */
     dispatch(...args: ArgumentTypes<T>): boolean
     {
         let node = this._head;
@@ -96,16 +131,33 @@ export class Signal<T extends Function>
         return true;
     }
 
+    /**
+     * Binds a new handler function to this signal that will be called for each dispatch.
+     *
+     * @param fn The handler function to bind.
+     * @param thisArg Optional `this` argument to use when calling this handler
+     */
     add(fn: WithVoidReturn<T>, thisArg: any = null): SignalBinding
     {
-        return this._addMiniSignalBinding(new SignalBindingImpl(fn, false, thisArg));
+        return this._addSignalBinding(new SignalBindingImpl(fn, false, thisArg));
     }
 
+    /**
+     * Binds a new handler function to this signal that will only be called once on the next dispatch.
+     *
+     * @param fn The handler function to bind.
+     * @param thisArg Optional `this` argument to use when calling this handler.
+     */
     once(fn: WithVoidReturn<T>, thisArg: any = null): SignalBinding
     {
-        return this._addMiniSignalBinding(new SignalBindingImpl(fn, true, thisArg));
+        return this._addSignalBinding(new SignalBindingImpl(fn, true, thisArg));
     }
 
+    /**
+     * Detaches a binding from this signal so that it is no longer called.
+     *
+     * @param node_ The binding to detach.
+     */
     detach(node_: SignalBinding): this
     {
         const node = node_ as SignalBindingImpl<T>;
@@ -141,6 +193,9 @@ export class Signal<T extends Function>
         return this;
     }
 
+    /**
+     * Detaches all bindings.
+     */
     detachAll()
     {
         let node = this._head;
@@ -160,11 +215,24 @@ export class Signal<T extends Function>
         return this;
     }
 
+    /**
+     * Sets the filter function to be called on each dispatch. This function takes the same
+     * parameters as a handler, but must return a boolean. Only when this function returns
+     * `true` will an event dispatch actually call bound handlers.
+     *
+     * @param filter The function to use as the filter.
+     */
     filter(filter: WithBoolReturn<T>)
     {
         this._filter = filter;
     }
 
+    /**
+     * Sets up a link between the passed signals and this one such that when the passed
+     * signal is dispatched, this signal is also dispatched.
+     *
+     * @param signals The signals to proxy.
+     */
     proxy(...signals: Signal<T>[]): this
     {
         const fn = (...args: ArgumentTypes<T>) => this.dispatch(...args);
@@ -177,7 +245,7 @@ export class Signal<T extends Function>
         return this;
     }
 
-    private _addMiniSignalBinding(node_: SignalBinding): SignalBinding
+    private _addSignalBinding(node_: SignalBinding): SignalBinding
     {
         const node = node_ as SignalBindingImpl<T>;
 
