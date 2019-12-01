@@ -36,14 +36,24 @@
     "docs": "typedoc",
     "predeploy": "rimraf ./docs && npm run docs",
     "deploy": "gh-pages -d docs",
-    "postpublish": "npm run deploy"
+    "postpublish": "npm run deploy",
+    "test": "mocha -r test/tshook.js ./test/*.test.ts"
   },
   "devDependencies": {
+    "@types/chai": "^4.2.5",
+    "@types/mocha": "^5.2.7",
+    "@types/sinon": "^7.5.1",
+    "@types/sinon-chai": "^3.2.3",
+    "chai": "^4.2.0",
     "gh-pages": "^2.1.1",
+    "mocha": "^6.2.2",
     "rimraf": "^3.0.0",
     "rollup": "^1.27.6",
     "rollup-plugin-terser": "^5.1.2",
     "rollup-plugin-typescript2": "^0.25.2",
+    "sinon": "^7.5.0",
+    "sinon-chai": "^3.3.0",
+    "ts-node": "^8.5.4",
     "typedoc": "^0.15.3",
     "typescript": "^3.7.2"
   },

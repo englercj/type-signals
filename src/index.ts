@@ -60,7 +60,7 @@ class SignalBindingImpl<T extends Function> implements SignalBinding
 /**
  * A signal is a dispatcher that can bind functions (handlers) to dispatched events.
  */
-export class Signal<T extends Function>
+export class Signal<T extends Function = (() => void)>
 {
     private _head: SignalBindingImpl<T> | null = null;
     private _tail: SignalBindingImpl<T> | null = null;
