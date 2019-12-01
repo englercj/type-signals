@@ -1,9 +1,3 @@
-export interface INodeEventEmitter
-{
-    on(event: string | symbol, listener: Function): this;
-    removeListener(event: string | symbol, listener: Function): this;
-}
-
 export type ArgumentTypes<T> = T extends (... args: infer U ) => infer R ? U : never;
 export type ReplaceReturnType<T, TNewReturn> = (...a: ArgumentTypes<T>) => TNewReturn;
 
