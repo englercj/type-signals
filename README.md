@@ -12,7 +12,7 @@ npm install type-signals
 
 ## Documentation
 
-- TODO
+- https://englercj.github.io/type-signals/
 
 ## Example Usage
 
