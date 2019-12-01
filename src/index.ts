@@ -1,20 +1,26 @@
 export type ArgumentTypes<T> = T extends (... args: infer U ) => infer R ? U : never;
 export type ReplaceReturnType<T, TNewReturn> = (...a: ArgumentTypes<T>) => TNewReturn;
 
-export type SignalFilterFn<T> = ReplaceReturnType<T, boolean>;
-export type SignalCallbackFn<T> = ReplaceReturnType<T, void>;
+export type WithBoolReturn<T> = ReplaceReturnType<T, boolean>;
+export type WithVoidReturn<T> = ReplaceReturnType<T, void>;
 
-export class SignalBinding<T extends Function>
+export interface SignalBinding
 {
-    readonly fn: SignalCallbackFn<T>;
+    detach(): void;
+    dispose(): void;
+}
+
+class SignalBindingImpl<T extends Function> implements SignalBinding
+{
+    readonly fn: WithVoidReturn<T>;
     readonly once: boolean;
     readonly thisArg: any;
 
-    next: SignalBinding<T> | null = null;
-    prev: SignalBinding<T> | null = null;
+    next: SignalBindingImpl<T> | null = null;
+    prev: SignalBindingImpl<T> | null = null;
     owner: Signal<any> | null = null;
 
-    constructor(fn: SignalCallbackFn<T>, once = false, thisArg: any)
+    constructor(fn: WithVoidReturn<T>, once = false, thisArg: any)
     {
         this.fn = fn;
         this.once = once;
@@ -39,12 +45,12 @@ export class SignalBinding<T extends Function>
 
 export class Signal<T extends Function>
 {
-    private _head: SignalBinding<T> | null = null;
-    private _tail: SignalBinding<T> | null = null;
+    private _head: SignalBindingImpl<T> | null = null;
+    private _tail: SignalBindingImpl<T> | null = null;
 
-    private _filter: SignalFilterFn<T> | null = null;
+    private _filter: WithBoolReturn<T> | null = null;
 
-    handlers(): SignalBinding<T>[]
+    handlers(): SignalBinding[]
     {
         let node = this._head;
 
@@ -63,9 +69,9 @@ export class Signal<T extends Function>
         return !!this._head;
     }
 
-    has(node: SignalBinding<T>): boolean
+    has(node: SignalBinding): boolean
     {
-        return node.owner === this;
+        return (node as SignalBindingImpl<T>).owner === this;
     }
 
     dispatch(...args: ArgumentTypes<T>): boolean
@@ -90,18 +96,20 @@ export class Signal<T extends Function>
         return true;
     }
 
-    add(fn: SignalCallbackFn<T>, thisArg: any = null): SignalBinding<T>
+    add(fn: WithVoidReturn<T>, thisArg: any = null): SignalBinding
     {
-        return this._addMiniSignalBinding(new SignalBinding(fn, false, thisArg));
+        return this._addMiniSignalBinding(new SignalBindingImpl(fn, false, thisArg));
     }
 
-    once(fn: SignalCallbackFn<T>, thisArg: any = null): SignalBinding<T>
+    once(fn: WithVoidReturn<T>, thisArg: any = null): SignalBinding
     {
-        return this._addMiniSignalBinding(new SignalBinding(fn, true, thisArg));
+        return this._addMiniSignalBinding(new SignalBindingImpl(fn, true, thisArg));
     }
 
-    detach(node: SignalBinding<T>): this
+    detach(node_: SignalBinding): this
     {
+        const node = node_ as SignalBindingImpl<T>;
+
         if (node.owner !== this)
             return this;
 
@@ -152,7 +160,7 @@ export class Signal<T extends Function>
         return this;
     }
 
-    filter(filter: SignalFilterFn<T>)
+    filter(filter: WithBoolReturn<T>)
     {
         this._filter = filter;
     }
@@ -169,8 +177,10 @@ export class Signal<T extends Function>
         return this;
     }
 
-    private _addMiniSignalBinding(node: SignalBinding<T>): SignalBinding<T>
+    private _addMiniSignalBinding(node_: SignalBinding): SignalBinding
     {
+        const node = node_ as SignalBindingImpl<T>;
+
         if (!this._head)
         {
             this._head = node;

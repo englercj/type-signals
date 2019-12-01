@@ -1,7 +1,3 @@
-import { Signal, SignalBinding } from './index';
-
-Object.defineProperties(Signal, {
-    SignalBinding: { get() { return SignalBinding; } },
-});
+import { Signal } from './index';
 
 export default Signal;
