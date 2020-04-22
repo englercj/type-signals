@@ -1,4 +1,4 @@
-# Type Signals [![Build Status](https://travis-ci.org/englercj/type-signals.svg?branch=master)](https://travis-ci.org/englercj/type-signals)
+# Type Signals
 
 Small and fast Signal library for Typescript.
 
