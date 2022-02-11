@@ -29,16 +29,18 @@ class SignalBindingImpl<T extends Function> implements SignalBinding
     readonly fn: WithVoidReturn<T>;
     readonly once: boolean;
     readonly thisArg: any;
+    readonly memo: boolean;
 
     next: SignalBindingImpl<T> | null = null;
     prev: SignalBindingImpl<T> | null = null;
     owner: Signal<any> | null = null;
 
-    constructor(fn: WithVoidReturn<T>, once = false, thisArg: any)
+    constructor(fn: WithVoidReturn<T>, memo = false, once = false, thisArg: any)
     {
         this.fn = fn;
         this.once = once;
         this.thisArg = thisArg;
+        this.memo = memo;
     }
 
     detach(): boolean
@@ -66,6 +68,7 @@ export class Signal<T extends Function = (() => void)>
     private _tail: SignalBindingImpl<T> | null = null;
 
     private _filter: WithBoolReturn<T> | null = null;
+    private _memo: ArgumentTypes<T> | null = null;
 
     /**
      * Gathers a list of all the handlers currently bound to this signal.
@@ -112,6 +115,7 @@ export class Signal<T extends Function = (() => void)>
     dispatch(...args: ArgumentTypes<T>): boolean
     {
         let node = this._head;
+        this._memo = args;
 
         if (!node)
             return false;
@@ -132,6 +136,20 @@ export class Signal<T extends Function = (() => void)>
     }
 
     /**
+     * Binds a new handler function to this signal that will may be called once using the 
+     * memoized value from the most recent dispatch, and will be called for each subsequent
+     * dispatches.
+     * 
+     * @param fn The handler function to bind.
+     * @param thisArg Optional `this` argument to use when calling this handler
+     */
+     addMemo(fn: WithVoidReturn<T>, thisArg: any = null): SignalBinding
+     {
+         return this._addSignalBinding(new SignalBindingImpl(fn, true, false, thisArg));
+     }
+ 
+
+    /**
      * Binds a new handler function to this signal that will be called for each dispatch.
      *
      * @param fn The handler function to bind.
@@ -139,7 +157,7 @@ export class Signal<T extends Function = (() => void)>
      */
     add(fn: WithVoidReturn<T>, thisArg: any = null): SignalBinding
     {
-        return this._addSignalBinding(new SignalBindingImpl(fn, false, thisArg));
+        return this._addSignalBinding(new SignalBindingImpl(fn, false, false, thisArg));
     }
 
     /**
@@ -150,7 +168,7 @@ export class Signal<T extends Function = (() => void)>
      */
     once(fn: WithVoidReturn<T>, thisArg: any = null): SignalBinding
     {
-        return this._addSignalBinding(new SignalBindingImpl(fn, true, thisArg));
+        return this._addSignalBinding(new SignalBindingImpl(fn, false, true, thisArg));
     }
 
     /**
@@ -264,6 +282,10 @@ export class Signal<T extends Function = (() => void)>
         }
 
         node.owner = this;
+
+        if (node.memo && this._memo) {
+            node.fn.apply(node.thisArg, this._memo);
+        }
 
         return node;
     }

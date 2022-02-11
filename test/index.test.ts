@@ -54,6 +54,19 @@ describe('Signal', function ()
         });
     });
 
+    describe('#memo', function () {
+        it('calls the a signal added with the memoized value', function() 
+        {
+            const sp = spy();
+            const s = new Signal<(a: number, b: number, c: string) => void>();
+
+            s.dispatch(1, 2, 'bar');
+            s.addMemo(sp);
+
+            expect(sp).to.be.calledOnceWithExactly(1, 2, 'bar');
+        });
+    });
+
     describe('#dispatch', function ()
     {
         it('calls each of the handlers', function ()
