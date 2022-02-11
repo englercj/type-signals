@@ -57,13 +57,34 @@ describe('Signal', function ()
     describe('#memo', function () {
         it('calls the a signal added with the memoized value', function() 
         {
-            const sp = spy();
-            const s = new Signal<(a: number, b: number, c: string) => void>();
+            const sp0 = spy();
+            const s0 = new Signal<(a: number, b: number, c: string) => void>();
 
-            s.dispatch(1, 2, 'bar');
-            s.addMemo(sp);
+            s0.dispatch(1, 2, 'bar');
+            s0.addMemo(sp0);
 
-            expect(sp).to.be.calledOnceWithExactly(1, 2, 'bar');
+            expect(sp0).to.be.calledOnceWithExactly(1, 2, 'bar');
+
+            s0.dispatch(3, 4, 'foo');
+            expect(sp0).to.be.calledWith(3, 4, 'foo')
+
+            const sp1 = spy();
+            s0.addMemo(sp1)
+            expect(sp1).to.be.calledOnceWithExactly(3, 4, 'foo');
+        });
+        it('does not memoize values for regular adds', function() 
+        {
+            const sp0 = spy();
+            const s0 = new Signal<(a: number, b: number, c: string) => void>();
+
+            s0.dispatch(1, 2, 'bar');
+            s0.addMemo(sp0);
+
+            expect(sp0).to.be.calledOnceWithExactly(1, 2, 'bar');
+
+            const sp1 = spy();
+            s0.add(sp1)
+            expect(sp1).to.not.be.to.not.have.been.called;
         });
     });
 
