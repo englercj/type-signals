@@ -136,9 +136,9 @@ export class Signal<T extends Function = (() => void)>
     }
 
     /**
-     * Binds a new handler function to this signal that may be called once using the memoized 
-     * value from the most recent dispatch, and will be called for each subsequent
-     * dispatches.
+     * Binds a new handler function to this signal that will be called once synchronously with 
+     * the add using the memoized value from the previous dispatch. The handler is called with
+     * each subsequent dispatch like a normal `add`.
      * 
      * @param fn The handler function to bind.
      * @param thisArg Optional `this` argument to use when calling this handler
